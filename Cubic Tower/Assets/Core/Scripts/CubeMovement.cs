@@ -6,7 +6,6 @@ namespace Core.Scripts
     {
         public void OnDrag(PointerEventData eventData)
         {
-            throw new System.NotImplementedException();
         }
     }
 }
