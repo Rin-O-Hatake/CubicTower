@@ -1,5 +1,4 @@
 using Core.Scripts.Cubes;
-using UnityEngine;
 using Zenject;
 
 namespace Core.Scripts.UI
@@ -17,7 +16,6 @@ namespace Core.Scripts.UI
         [Inject]
         public void Construct(CubicTowerView currentView)
         {
-            Debug.Log('1');
             _currentView = currentView;
             InitCubicTowerView();
         }

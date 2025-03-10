@@ -8,13 +8,13 @@ namespace Core.Scripts.Cubes
     {
         #region Fields
 
-        private Cube _cubePrefab;
-        private CubeData[] _cubes;
+        [SerializeField] private Cube _cubePrefab;
+        [SerializeField] private CubeData[] _cubes;
 
         #region Properties
 
         public CubeData[] Cubes => _cubes;
-        public Cube CubePrefab => _cubePrefab;
+        public Cube CubePrefab => _cubePrefab; 
 
         #endregion
         
@@ -26,7 +26,7 @@ namespace Core.Scripts.Cubes
     {
         #region Fields
 
-        private Color _color;
+        [SerializeField] private Color _color;
         private int _id;
 
         #region Properties
