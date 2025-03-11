@@ -9,7 +9,7 @@ namespace Core.Scripts
         #region Feilds
         
         [SerializeField] private CubicTowerView _cubicTowerView;
-
+        
         #endregion
 
         public override void InstallBindings()

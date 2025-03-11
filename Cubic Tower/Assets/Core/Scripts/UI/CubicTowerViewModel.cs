@@ -1,4 +1,6 @@
+using System;
 using Core.Scripts.Cubes;
+using UnityEngine;
 using Zenject;
 
 namespace Core.Scripts.UI
@@ -11,18 +13,23 @@ namespace Core.Scripts.UI
         
         private Cube[] _currentCubes;
 
+        #region Properties
+
+        public CubicTowerView CubicTowerView => _currentView;
+
+        #endregion
+
         #endregion
 
         [Inject]
         public void Construct(CubicTowerView currentView)
         {
             _currentView = currentView;
-            InitCubicTowerView();
         }
 
-        private void InitCubicTowerView()
+        public void InitCubicTowerView(Action<CubicDropData> isDrop)
         {
-            _currentCubes = _currentView.CreateAllCubes().ToArray();
+            _currentCubes = _currentView.CreateAllCubes(isDrop).ToArray();
         }
     }
 }
