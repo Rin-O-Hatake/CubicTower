@@ -27,11 +27,13 @@ namespace Core.Scripts.UI
         public List<Cube> CreateAllCubes(Action<CubicDropData> isDrop)
         {
             List<Cube> cubes = new List<Cube>();
-            
-            foreach (var cube in _cubesConfig.Cubes)
+
+            for (int index = 0; index < _cubesConfig.Cubes.Length; index++)
             {
                 Cube newCube = Instantiate(_cubesConfig.CubePrefab, ContentCubes.transform);
-                newCube.Initialize(cube);
+
+                _cubesConfig.Cubes[index].SetId(index);
+                newCube.Initialize(_cubesConfig.Cubes[index]);
                 cubes.Add(newCube);
                 
                 newCube.IsDragging
@@ -40,7 +42,7 @@ namespace Core.Scripts.UI
                 
                 newCube.IsDrop
                     .Subscribe(isDrop)
-                    .AddTo(_disposables);
+                    .AddTo(_disposables);   
             }
             
             return cubes;

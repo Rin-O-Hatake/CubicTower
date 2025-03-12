@@ -37,5 +37,10 @@ namespace Core.Scripts.Cubes
         #endregion
 
         #endregion
+
+        public void SetId(int id)
+        {
+            _id = id;
+        }
     }
 }

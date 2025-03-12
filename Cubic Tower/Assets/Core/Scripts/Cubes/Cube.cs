@@ -1,8 +1,10 @@
+using System;
 using Core.Scripts.Data;
 using R3;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 namespace Core.Scripts.Cubes
 {
@@ -16,8 +18,8 @@ namespace Core.Scripts.Cubes
         [Title("Drag Properties")]
         [SerializeField] private RectTransform _rectTransform;
         [SerializeField] private CanvasGroup _canvasGroup;
+        [SerializeField] private LayerMask _layerTriggerDrop;
         
-        private int _currentId;
         private Vector3 _currentOriginalPosition;
         private CubeData _currentCubeData;
         
@@ -29,7 +31,6 @@ namespace Core.Scripts.Cubes
         public void Initialize(CubeData cube)
         {
             _visual.SetColor(cube.Color);
-            _currentId = cube.Id;
             _currentCubeData = cube;
         }
 
@@ -72,8 +73,8 @@ namespace Core.Scripts.Cubes
         private bool IsDroppedOnScene(PointerEventData eventData)
         {
             Ray ray = MainData.SceneData.CameraScene.ScreenPointToRay(eventData.position);
-            RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
-
+            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, int.MaxValue, _layerTriggerDrop);
+            
             if (hit.collider != null)
             {
                 IsDrop.OnNext(new CubicDropData(hit.point, _currentCubeData));
