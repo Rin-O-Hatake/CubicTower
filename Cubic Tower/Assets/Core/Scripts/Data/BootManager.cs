@@ -8,12 +8,13 @@ namespace Core.Scripts.Data
 
         [SerializeField] private Canvas canvas;
         [SerializeField] private Camera mainCamera;
-        
+        [SerializeField] private CubicTowerLogger logger;
+
         #endregion
 
         private void Awake()
         {
-            MainData.SceneData = new SceneData(canvas, mainCamera);
+            MainData.SceneData = new SceneData(canvas, mainCamera, logger);
         }
     }
 }

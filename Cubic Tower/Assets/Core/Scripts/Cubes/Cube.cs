@@ -38,7 +38,7 @@ namespace Core.Scripts.Cubes
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            IsDragging.OnNext(false);
+            IsDragging?.OnNext(false);
             _currentOriginalPosition = _rectTransform.position;
         }
 
@@ -58,7 +58,7 @@ namespace Core.Scripts.Cubes
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            IsDragging.OnNext(true);
+            IsDragging?.OnNext(true);
             
             if (!IsDroppedOnScene(eventData))
             {

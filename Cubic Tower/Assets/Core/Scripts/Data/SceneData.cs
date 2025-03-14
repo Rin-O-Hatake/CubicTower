@@ -6,11 +6,13 @@ namespace Core.Scripts.Data
     {
         public Canvas CanvasScene;
         public Camera CameraScene;
+        public CubicTowerLogger Logger;
 
-        public SceneData(Canvas canvas, Camera camera)
+        public SceneData(Canvas canvas, Camera camera, CubicTowerLogger logger)
         {
             CanvasScene = canvas;
             CameraScene = camera;
+            Logger = logger;
         }
     }
 }

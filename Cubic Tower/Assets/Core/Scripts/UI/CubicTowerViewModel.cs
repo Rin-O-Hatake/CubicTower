@@ -1,5 +1,6 @@
 using System;
 using Core.Scripts.Cubes;
+using Core.Scripts.Data;
 using UnityEngine;
 using Zenject;
 
