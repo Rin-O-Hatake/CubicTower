@@ -87,7 +87,6 @@ namespace Core.Scripts.SceneManagers
 
                 if (screenPosition.y > screenHeight)
                 {
-                    MainData.SceneData.Logger.ShowText(MainData.SceneData.Logger.MAXIMUM_HEIGHT);
                     return false;
                 }
                 
