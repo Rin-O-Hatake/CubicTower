@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Scripts.Cubes;
 using Core.Scripts.Data;
-using Core.Scripts.Saves;
 using Core.Scripts.UI;
-using Cysharp.Threading.Tasks;
 using R3;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Zenject;
-using Random = UnityEngine.Random;
 
 namespace Core.Scripts.SceneManagers
 {
@@ -27,6 +24,9 @@ namespace Core.Scripts.SceneManagers
         
         private CheckingCubes _checkingCubes = new CheckingCubes();
         private CubicTowerViewModel _currentViewModel;
+        private SaveCubicDataManager _currentSaveDataManager = new SaveCubicDataManager();
+        
+        private Action<bool> _isExplosionAction;
         
         private List<SceneCubic> _currentSceneCubes = new List<SceneCubic>();
         private CompositeDisposable _disposable = new CompositeDisposable();
@@ -39,7 +39,7 @@ namespace Core.Scripts.SceneManagers
         public void Construct(CubicTowerViewModel cubicViewModel)
         {
             _currentViewModel = cubicViewModel;
-            _currentViewModel.InitCubicTowerView(CreateCubic, SaveCubes);
+            _currentViewModel.InitCubicTowerView(CreateCubic, () => _currentSaveDataManager.SaveCubes(_currentSceneCubes));
             _checkingCubes.Init(_currentSceneCubes, _sceneCubic);
         }
 
@@ -47,7 +47,7 @@ namespace Core.Scripts.SceneManagers
 
         public void Start()
         {
-            LoadCubes();
+            _currentSaveDataManager.LoadCubes(LoadCubic, _currentViewModel);
         }
 
 
@@ -55,9 +55,10 @@ namespace Core.Scripts.SceneManagers
         
         #region Create Cube
 
-        private void CreateCubic(CubicDropData cubicDropData)
+        private void CreateCubic(CreateCubicData cubicDropData)
         {
-            CreateCubic(cubicDropData,true);
+            _isExplosionAction = cubicDropData.ExplosionAction;
+            CreateCubic(cubicDropData.DropData,true);
         }
 
         private void LoadCubic(CubicDropData cubicDropData)
@@ -69,9 +70,11 @@ namespace Core.Scripts.SceneManagers
         {
             if (!_checkingCubes.CheckCubePosition(cubicDropData.Position))
             {
+                _isExplosionAction?.Invoke(true);
                 return;
             }
 
+            _isExplosionAction?.Invoke(false);
             SceneCubic newSceneCubic = Instantiate(_sceneCubic, _content.transform);
             
             bool isFirstCubic = _currentSceneCubes.Count == 0;
@@ -141,52 +144,12 @@ namespace Core.Scripts.SceneManagers
 
         private bool CheckDestroyUpCubes(Vector2 upperCubic, Vector2 lowerCubic)
         {
-            float halfWidth = _checkingCubes.GetHalfWidth();
+            float halfWidth = _checkingCubes.GetHalfWidthCubic();
 
             return lowerCubic.x + halfWidth < upperCubic.x - halfWidth ||
                     lowerCubic.x - halfWidth > upperCubic.x + halfWidth;
 
         }
-
-        #endregion
-
-        #region SaveCubes
-
-        private void SaveCubes()
-        {
-            RootSavesData rootSavesData = new RootSavesData();
-            foreach (var cube in _currentSceneCubes)
-            {
-                rootSavesData.Saves.Add(new SaveData
-                {
-                    Id = cube.Id,
-                    PositionX = cube.transform.position.x,
-                    PositionY = cube.transform.position.y
-                });
-            }
-
-            SaveManager.SaveGame(rootSavesData).Forget();
-        }
-
-        private async void LoadCubes()
-        {
-            RootSavesData rootSavesData = await SaveManager.LoadGame();
-
-            if (rootSavesData == null)
-            {
-                return;
-            }
-            
-            foreach (SaveData saveCube in rootSavesData.Saves)
-            {
-                LoadCubic(new CubicDropData
-                {
-                    Position = new Vector2(saveCube.PositionX, saveCube.PositionY),
-                    CubeData = _currentViewModel.CubicTowerView.CubesConfig.Cubes.Find(cube => cube.Id.Equals(saveCube.Id))
-                });   
-            }
-        }
-
         #endregion
     }
 }

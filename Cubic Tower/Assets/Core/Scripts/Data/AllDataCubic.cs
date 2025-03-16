@@ -1,3 +1,4 @@
+using System;
 using Core.Scripts.Cubes;
 using Vector2 = UnityEngine.Vector2;
 
@@ -21,6 +22,12 @@ namespace Core.Scripts.Data
         CUBIC_REMOVE,
         CUBIC_DESTROY,
         MAXIMUM_HEIGHT
+    }
+
+    public class CreateCubicData
+    {
+        public CubicDropData DropData;
+        public Action<bool> ExplosionAction;
     }
 }
 

@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Core.Scripts.Data;
 using R3;
 using Sirenix.OdinInspector;
+using Unity.Plastic.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -24,7 +25,7 @@ namespace Core.Scripts.Cubes
         private CubeData _currentCubeData;
         
         public readonly Subject<bool> IsDragging = new Subject<bool>();
-        public readonly Subject<CubicDropData> IsDrop = new Subject<CubicDropData>();
+        public readonly Subject<CreateCubicData> IsDrop = new Subject<CreateCubicData>();
         
         #endregion
 
@@ -39,6 +40,8 @@ namespace Core.Scripts.Cubes
         public void OnBeginDrag(PointerEventData eventData)
         {
             IsDragging?.OnNext(false);
+            _canvasGroup.blocksRaycasts = false;
+            _canvasGroup.alpha = 0.9f;
             _currentOriginalPosition = _rectTransform.position;
         }
 
@@ -58,29 +61,37 @@ namespace Core.Scripts.Cubes
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            IsDragging?.OnNext(true);
-
+            _canvasGroup.blocksRaycasts = true;
+            _canvasGroup.alpha = 1;
+            
             Explosion(eventData);
         }
 
-        private async void Explosion(PointerEventData eventData)
+        private void Explosion(PointerEventData eventData) 
         {
             if (!IsDroppedOnScene(eventData))
             {
-                _animationCube.EnableAnimationGameObject();
-                int duration = _animationCube.ShowExplosion();
-
-                MainData.SceneData.Logger.TextSwitcher.SetLocalization(LocalizationType.CUBIC_DESTROY);
-                await Task.Delay(duration);
-                ResetPosition();
-                return;
+                Explosion();
             }
+        }
 
+        private async void Explosion(bool isWriteLog = true)
+        {
+            _animationCube.EnableAnimationGameObject();
+            int duration = _animationCube.ShowExplosion();
+
+            if (isWriteLog)
+            {
+                MainData.SceneData.Logger.TextSwitcher.SetLocalization(LocalizationType.CUBIC_DESTROY);
+            }
+            
+            await Task.Delay(duration);
             ResetPosition();
         }
 
         private void ResetPosition()
         {
+            IsDragging?.OnNext(true);
             _rectTransform.position = _currentOriginalPosition;
             _animationCube.EnableAnimationGameObject(false);
         }
@@ -94,11 +105,26 @@ namespace Core.Scripts.Cubes
             
             if (hit.collider != null)
             {
-                IsDrop.OnNext(new CubicDropData(hit.point, _currentCubeData));
+                IsDrop.OnNext(new CreateCubicData
+                {
+                    DropData = new CubicDropData(hit.point, _currentCubeData),
+                    ExplosionAction = CheckDropAndExplosion
+                });
                 return true;
             }
 
             return false;
+        }
+
+        private void CheckDropAndExplosion(bool state)
+        {
+            if (state)
+            {
+                Explosion(false);
+                return;
+            }
+            
+            ResetPosition();
         }
 
         #endregion

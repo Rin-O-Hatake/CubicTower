@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Core/Scenes/SampleScene.unity
+    path: Assets/Core/Scenes/S_CubeTower.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 8968085c5a5ac0543b3c089167835869, type: 2}

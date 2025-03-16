@@ -26,7 +26,8 @@ namespace Core.Scripts.SceneManagers
         
         public float GenerateRandomPositionXCubic(float positionX)
         {
-            float halfWidth = GetHalfWidth();
+            float halfWidth = GetHalfWidthCubic();
+            float width = GetWidthCubic();
             float lastCubePositionX = GetLastCubePositionX();
 
             float maxRandomPositionX;
@@ -34,18 +35,34 @@ namespace Core.Scripts.SceneManagers
             
             if (positionX > lastCubePositionX)
             {
-                maxRandomPositionX = lastCubePositionX + halfWidth - positionX;
-                minRandomPositionX = halfWidth - maxRandomPositionX;
+                if (lastCubePositionX + width - positionX > halfWidth)
+                {
+                    maxRandomPositionX = positionX + halfWidth;
+                }
+                else
+                {
+                    maxRandomPositionX = lastCubePositionX + width;
+                }
+                
+                minRandomPositionX = positionX - halfWidth;
             }
             else
             {
-                minRandomPositionX = lastCubePositionX - halfWidth + Math.Abs(positionX);
-                maxRandomPositionX = halfWidth - minRandomPositionX;
+                if (lastCubePositionX - width + Math.Abs(positionX) > halfWidth)
+                {
+                    minRandomPositionX = positionX - halfWidth;
+                }
+                else
+                {
+                    minRandomPositionX = lastCubePositionX - width;
+                }
+                
+                maxRandomPositionX = positionX + width;
             }
             
             float randomWidth =  Random.Range(minRandomPositionX, maxRandomPositionX);
             
-            return positionX + randomWidth; 
+            return randomWidth; 
         }
 
         private float GetLastCubePositionX()
@@ -53,9 +70,14 @@ namespace Core.Scripts.SceneManagers
             return _currentSceneCubes.LastOrDefault()!.transform.position.x;
         }
         
-        public float GetHalfWidth()
+        public float GetHalfWidthCubic()
         {
             return _sceneCubic.SpriteRenderCube.GetComponent<Renderer>().bounds.size.x / 2;
+        }
+
+        public float GetWidthCubic()
+        {
+            return _sceneCubic.SpriteRenderCube.GetComponent<Renderer>().bounds.size.x;
         }
         
         public bool CheckCubePosition(Vector2 position)
@@ -76,10 +98,10 @@ namespace Core.Scripts.SceneManagers
                     return false;
                 }
                 
-                float halfWidth = GetHalfWidth();
+                float width = GetWidthCubic();
                 float positionX = GetLastCubePositionX();
 
-                if (positionX + halfWidth < position.x || positionX - halfWidth > position.x)
+                if (positionX + width < position.x || positionX - width > position.x)
                 {
                     return false;
                 }

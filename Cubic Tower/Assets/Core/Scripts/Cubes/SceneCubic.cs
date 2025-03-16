@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Core.Scripts.Data;
+using DG.Tweening;
 using R3;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -23,6 +24,7 @@ namespace Core.Scripts.Cubes
         private Vector3 _offset;
         private Vector3 _originalPosition;
         private bool _isInBasket;
+        private bool _isDead;
 
         public readonly Subject<SceneCubic> RemoveSceneCube = new Subject<SceneCubic>();
 
@@ -67,7 +69,13 @@ namespace Core.Scripts.Cubes
             MouseUp();
             MoveCube();
         }
-        
+
+        private void OnDestroy()
+        {
+            _isDead = true;
+            transform.DOKill();
+        }
+
         #endregion
 
         #region Triggers
@@ -138,7 +146,7 @@ namespace Core.Scripts.Cubes
                 Debug.LogError($"Exeption: {e.Message}");
             }
 
-            if (!gameObject)
+            if (_isDead)
             {
                 return;
             }

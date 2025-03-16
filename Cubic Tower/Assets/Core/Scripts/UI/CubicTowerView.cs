@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Core.Scripts.Cubes;
 using Core.Scripts.Data;
@@ -15,10 +16,12 @@ namespace Core.Scripts.UI
         [SerializeField] private ScrollRect _scrollRect;
         [SerializeField] private CubesConfig _cubesConfig;
         [SerializeField] private Button _saveButton;
+        [SerializeField] private CanvasGroup _canvasGroupScrollbar; // к сожалению не смог придумать лучшей реализации блока
         
         public CompositeDisposable _disposables = new CompositeDisposable();
         
         private Action _saveDataAction;
+        private bool _isProcessing;
         
         #region Properties
 
@@ -34,7 +37,7 @@ namespace Core.Scripts.UI
             _saveDataAction = saveData;
         }
         
-        public List<Cube> CreateAllCubes(Action<CubicDropData> isDrop)
+        public List<Cube> CreateAllCubes(Action<CreateCubicData> isDrop)
         {
             List<Cube> cubes = new List<Cube>();
 
@@ -52,23 +55,25 @@ namespace Core.Scripts.UI
                 
                 newCube.IsDrop
                     .Subscribe(isDrop)
-                    .AddTo(_disposables);   
+                    .AddTo(_disposables);
             }
             
             return cubes;
         }
-
+        
         private void SetEnableScroll(bool enable)
         {
+            _canvasGroupScrollbar.blocksRaycasts = enable;
             _scrollRect.enabled = enable;
         }
-
+        
         #region MonoBehavior
 
         public void Awake()
         {
             _saveButton.onClick.AddListener(SaveButton);
         }
+        
 
         public void OnDestroy()
         {

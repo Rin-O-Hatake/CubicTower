@@ -27,7 +27,7 @@ namespace Core.Scripts.UI
             _currentView = currentView;
         }
 
-        public void InitCubicTowerView(Action<CubicDropData> isDrop, Action saveData)
+        public void InitCubicTowerView(Action<CreateCubicData> isDrop, Action saveData)
         {
             _currentCubes = _currentView.CreateAllCubes(isDrop).ToArray();
             _currentView.InitCubicTowerView(saveData);

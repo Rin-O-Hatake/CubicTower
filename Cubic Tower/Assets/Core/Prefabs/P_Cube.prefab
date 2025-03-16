@@ -207,7 +207,7 @@ MonoBehaviour:
     _durationExplosionMilliseconds: 350
     _cubeVisual: {fileID: 4646938929048594558}
   _rectTransform: {fileID: 5070515378112376310}
-  _canvasGroup: {fileID: 0}
+  _canvasGroup: {fileID: 8215165810036764476}
   _layerTriggerDrop:
     serializedVersion: 2
     m_Bits: 64
