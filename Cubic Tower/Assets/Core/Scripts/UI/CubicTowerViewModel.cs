@@ -1,7 +1,6 @@
 using System;
 using Core.Scripts.Cubes;
 using Core.Scripts.Data;
-using UnityEngine;
 using Zenject;
 
 namespace Core.Scripts.UI
@@ -28,9 +27,10 @@ namespace Core.Scripts.UI
             _currentView = currentView;
         }
 
-        public void InitCubicTowerView(Action<CubicDropData> isDrop)
+        public void InitCubicTowerView(Action<CubicDropData> isDrop, Action saveData)
         {
             _currentCubes = _currentView.CreateAllCubes(isDrop).ToArray();
+            _currentView.InitCubicTowerView(saveData);
         }
     }
 }

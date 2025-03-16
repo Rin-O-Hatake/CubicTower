@@ -1,10 +1,9 @@
-using System;
+using System.Threading.Tasks;
 using Core.Scripts.Data;
 using R3;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
 namespace Core.Scripts.Cubes
 {
@@ -14,6 +13,7 @@ namespace Core.Scripts.Cubes
 
         [Title("Components")]
         [SerializeField] private CubeVisual _visual;
+        [SerializeField] private AnimationCube _animationCube;
         
         [Title("Drag Properties")]
         [SerializeField] private RectTransform _rectTransform;
@@ -59,13 +59,30 @@ namespace Core.Scripts.Cubes
         public void OnEndDrag(PointerEventData eventData)
         {
             IsDragging?.OnNext(true);
-            
+
+            Explosion(eventData);
+        }
+
+        private async void Explosion(PointerEventData eventData)
+        {
             if (!IsDroppedOnScene(eventData))
             {
-                
+                _animationCube.EnableAnimationGameObject();
+                int duration = _animationCube.ShowExplosion();
+
+                MainData.SceneData.Logger.TextSwitcher.SetLocalization(LocalizationType.CUBIC_DESTROY);
+                await Task.Delay(duration);
+                ResetPosition();
+                return;
             }
-            
+
+            ResetPosition();
+        }
+
+        private void ResetPosition()
+        {
             _rectTransform.position = _currentOriginalPosition;
+            _animationCube.EnableAnimationGameObject(false);
         }
 
         #region Scene Drop

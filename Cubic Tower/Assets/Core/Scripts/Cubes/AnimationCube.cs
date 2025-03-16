@@ -8,10 +8,10 @@ namespace Core.Scripts.Cubes
     {
         #region Fields
 
-        [SerializeField] private Animator _animator;
-        [SerializeField] private int _durationExplosionMilliseconds;
+        [SerializeField] protected Animator _animator;
+        [SerializeField] protected int _durationExplosionMilliseconds;
         
-        [SerializeField] private GameObject _cubeVisual;
+        [SerializeField] protected GameObject _cubeVisual;
 
         #region Animation Names
 

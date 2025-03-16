@@ -1,41 +1,43 @@
+using System;
+using System.Collections.Generic;
+using Core.Scripts.Data;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace Core.Scripts.UI.Localization
 {
-    public class TextSwitcher : MonoBehaviour
+    [Serializable]
+    public class TextSwitcher
     {
         #region Fields
 
-        [SerializeField] private TMP_Text uiText;
-        [SerializeField] private string[] phraseKeys;
-        private int currentPhraseIndex;
+        [SerializeField] private List<string> _phraseKeys;
+        
+        private TMP_Text _uiText;
+        private int _currentPhraseIndex;
 
         #endregion
 
-        void Start()
+        public void Init(TMP_Text uiText)
         {
-            UpdateText();
+            _uiText = uiText;
         }
 
-        public void NextPhrase()
+        //TODO Refactor
+        public void SetLocalization(LocalizationType localizationKey)
         {
-            currentPhraseIndex = (currentPhraseIndex + 1) % phraseKeys.Length;
-            UpdateText();
+            _currentPhraseIndex = _phraseKeys.FindIndex(key => key == localizationKey.ToString());
+            UpdateText().Forget();
         }
 
-        public void PreviousPhrase()
+        private async UniTaskVoid UpdateText()
         {
-            currentPhraseIndex = (currentPhraseIndex - 1 + phraseKeys.Length) % phraseKeys.Length;
-            UpdateText();
-        }
+            var localizedString = new LocalizedString { TableReference = "UI_Texts", TableEntryReference = _phraseKeys[_currentPhraseIndex] };
 
-        private async void UpdateText()
-        {
-            var localizedString = new LocalizedString { TableReference = "UI_Texts", TableEntryReference = phraseKeys[currentPhraseIndex] };
-
-            localizedString.GetLocalizedString();
+            _uiText.text = localizedString.GetLocalizedString();
         }   
     }
 }

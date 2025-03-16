@@ -937,6 +937,8 @@ MonoBehaviour:
     _animator: {fileID: 8227079077830374579}
     _durationExplosionMilliseconds: 350
     _cubeVisual: {fileID: 560744635050809461}
+    _durationJumpCubic: 0.2
+    _durationFallCubic: 0.5
   _layerMaskCube:
     serializedVersion: 2
     m_Bits: 8

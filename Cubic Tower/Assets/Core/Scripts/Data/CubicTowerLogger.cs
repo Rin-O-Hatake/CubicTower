@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using Core.Scripts.UI.Localization;
+using TMPro;
 using UnityEngine;
 
 namespace Core.Scripts.Data
@@ -8,21 +9,23 @@ namespace Core.Scripts.Data
         #region Fields
 
         [SerializeField] private TMP_Text _loggerText;
+        [SerializeField] private TextSwitcher _textSwitcher;
 
-        #region Const Logs
+        #region propeties
 
-        public const string CUBIC_INSTALL = "The cube is installed";
-        public const string CUBIC_REMOVE = "The cube is thrown out";
-        public const string CUBIC_DESTROY = "The cube is destroyed";
-        public const string MAXIMUM_HEIGHT = "You can not put new cubes, the maximum height";
+        public TextSwitcher TextSwitcher => _textSwitcher;
 
         #endregion
 
         #endregion
+        
+        #region MonoBehavior
 
-        public void ShowText(string message)
+        public void Start()
         {
-            _loggerText.text = message;
+            _textSwitcher.Init(_loggerText);
         }
+
+        #endregion
     }
 }

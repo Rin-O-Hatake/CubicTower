@@ -1,3 +1,4 @@
+using Core.Scripts.Saves;
 using UnityEngine;
 
 namespace Core.Scripts.Data
@@ -15,6 +16,7 @@ namespace Core.Scripts.Data
         private void Awake()
         {
             MainData.SceneData = new SceneData(canvas, mainCamera, logger);
+            SaveManager.CombineData();
         }
     }
 }

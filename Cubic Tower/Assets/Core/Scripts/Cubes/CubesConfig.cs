@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Scripts.Cubes
@@ -9,11 +10,11 @@ namespace Core.Scripts.Cubes
         #region Fields
 
         [SerializeField] private Cube _cubePrefab;
-        [SerializeField] private CubeData[] _cubes;
+        [SerializeField] private List<CubeData> _cubes;
 
         #region Properties
 
-        public CubeData[] Cubes => _cubes;
+        public List<CubeData> Cubes => _cubes;
         public Cube CubePrefab => _cubePrefab; 
 
         #endregion
@@ -41,6 +42,11 @@ namespace Core.Scripts.Cubes
         public void SetId(int id)
         {
             _id = id;
+        }
+
+        public void SetColor(Color color)
+        {
+            _color = color;
         }
     }
 }

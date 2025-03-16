@@ -14,6 +14,14 @@ namespace Core.Scripts.Data
             CubeData = cubeData;
         }
     }
+
+    public enum LocalizationType
+    {
+        CUBIC_INSTALL,
+        CUBIC_REMOVE,
+        CUBIC_DESTROY,
+        MAXIMUM_HEIGHT
+    }
 }
 
 

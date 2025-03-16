@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Core.Scripts.Data;
-using DG.Tweening;
 using R3;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -11,11 +10,9 @@ namespace Core.Scripts.Cubes
     public class SceneCubic : MonoBehaviour
     {
         #region Field
-
-        [SerializeField, Range(0.1f, 5f)] private float _durationJumpCubic;
-        [SerializeField, Range(0.1f, 5f)] private float _durationFallCubic; 
+        
         [SerializeField] private SpriteRenderer _cubicSprite;
-        [SerializeField] private AnimationCube _animationCube;
+        [SerializeField] private AnimationCubeScene _animationCube;
         
         [Title("Layer Masks")]
         [SerializeField] private LayerMask _layerMaskCube;
@@ -32,6 +29,7 @@ namespace Core.Scripts.Cubes
         #region Properties
 
         public GameObject SpriteRenderCube => _animationCube.CubeVisual;
+        public AnimationCubeScene AnimationCube => _animationCube;
         public int Id => _currentId;
 
         #endregion
@@ -42,19 +40,6 @@ namespace Core.Scripts.Cubes
         {
             _currentId = cubeData.Id;
             _cubicSprite.color = cubeData.Color;
-        }
-        
-        public void ShowCubic()
-        {
-            float heightJump = _animationCube.CubeVisual.GetComponent<Renderer>().bounds.size.y / 4;
-            DOTween.Sequence()
-                .Append(transform.DOMoveY( transform.position.y + heightJump, _durationJumpCubic))
-                .Append(transform.DOMoveY(transform.position.y, _durationJumpCubic));
-        }
-
-        public void FallCubic(float position)
-        {
-            transform.DOMoveY(position, _durationFallCubic);
         }
 
         #region MonoBehavior
@@ -129,6 +114,7 @@ namespace Core.Scripts.Cubes
 
                 if (_isInBasket)
                 {
+                    MainData.SceneData.Logger.TextSwitcher.SetLocalization(LocalizationType.CUBIC_REMOVE);
                     DestroyCubic();
                     return;
                 } 
@@ -151,6 +137,11 @@ namespace Core.Scripts.Cubes
             {
                 Debug.LogError($"Exeption: {e.Message}");
             }
+
+            if (!gameObject)
+            {
+                return;
+            }
             
             Destroy(gameObject);
         }
@@ -171,6 +162,7 @@ namespace Core.Scripts.Cubes
         private Vector3 GetMouseWorldPosition()
         {
             Vector3 mousePosition = Input.mousePosition;
+            // ReSharper disable once PossibleNullReferenceException
             mousePosition.z = Camera.main.WorldToScreenPoint(transform.position).z;
             return Camera.main.ScreenToWorldPoint(mousePosition);
         }

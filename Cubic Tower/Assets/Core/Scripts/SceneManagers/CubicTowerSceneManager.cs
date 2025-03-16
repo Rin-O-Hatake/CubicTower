@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Scripts.Cubes;
 using Core.Scripts.Data;
+using Core.Scripts.Saves;
 using Core.Scripts.UI;
+using Cysharp.Threading.Tasks;
 using R3;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -23,7 +25,8 @@ namespace Core.Scripts.SceneManagers
         [Space(10)]
         [SerializeField] private GameObject _endPositionCube;
         
-        private CubicTowerViewModel _currentView;
+        private CheckingCubes _checkingCubes = new CheckingCubes();
+        private CubicTowerViewModel _currentViewModel;
         
         private List<SceneCubic> _currentSceneCubes = new List<SceneCubic>();
         private CompositeDisposable _disposable = new CompositeDisposable();
@@ -35,15 +38,36 @@ namespace Core.Scripts.SceneManagers
         [Inject]
         public void Construct(CubicTowerViewModel cubicViewModel)
         {
-            _currentView = cubicViewModel;
-            _currentView.InitCubicTowerView(CreateCubic);
+            _currentViewModel = cubicViewModel;
+            _currentViewModel.InitCubicTowerView(CreateCubic, SaveCubes);
+            _checkingCubes.Init(_currentSceneCubes, _sceneCubic);
         }
 
+        #region MonoBehavior
+
+        public void Start()
+        {
+            LoadCubes();
+        }
+
+
+        #endregion
+        
         #region Create Cube
 
         private void CreateCubic(CubicDropData cubicDropData)
         {
-            if (!CheckCubePosition(cubicDropData.Position))
+            CreateCubic(cubicDropData,true);
+        }
+
+        private void LoadCubic(CubicDropData cubicDropData)
+        {
+            CreateCubic(cubicDropData, false);
+        }
+
+        private void CreateCubic(CubicDropData cubicDropData, bool positionDisplacement)
+        {
+            if (!_checkingCubes.CheckCubePosition(cubicDropData.Position))
             {
                 return;
             }
@@ -53,83 +77,33 @@ namespace Core.Scripts.SceneManagers
             bool isFirstCubic = _currentSceneCubes.Count == 0;
             
             SetPosition();
-            InitNewSceneCubic();
+            InitNewSceneCubic(newSceneCubic, cubicDropData);
             
+            MainData.SceneData.Logger.TextSwitcher.SetLocalization(LocalizationType.CUBIC_INSTALL);
             _currentSceneCubes.Add(newSceneCubic);
             
             return;
 
-            void InitNewSceneCubic()
-            {
-                newSceneCubic.Init(cubicDropData.CubeData);
-                newSceneCubic.ShowCubic();
-                
-                newSceneCubic.RemoveSceneCube
-                    .Subscribe(RemoveSceneCube)
-                    .AddTo(_disposable);
-            }
-
             void SetPosition()
             {
-                Vector2 newPosition = new Vector2(isFirstCubic ? cubicDropData.Position.x : GenerateRandomPositionXCubic(cubicDropData.Position.x),
+                Vector2 newPosition = new Vector2(isFirstCubic || !positionDisplacement ? cubicDropData.Position.x : _checkingCubes.GenerateRandomPositionXCubic(cubicDropData.Position.x),
                     isFirstCubic ? _endPositionCube.transform.position.y :
                         _currentSceneCubes.Last().SpriteRenderCube.GetComponent<Renderer>().bounds.size.y + _currentSceneCubes.Last().transform.position.y);
+                
                 newSceneCubic.transform.position = newPosition;
             }
         }
-
-        private bool CheckCubePosition(Vector2 position)
+        
+        private void InitNewSceneCubic(SceneCubic newSceneCubic, CubicDropData cubicDropData)
         {
-            if (_currentSceneCubes.Count > 0)
-            {
-                Vector3 screenPosition = MainData.SceneData.CameraScene.WorldToScreenPoint(transform.position);
-                float screenHeight = Screen.height;
-
-                if (screenPosition.y > screenHeight)
-                {
-                    return false;
-                }
+            newSceneCubic.Init(cubicDropData.CubeData);
+            newSceneCubic.AnimationCube.ShowCubic(newSceneCubic.transform);
                 
-                float halfWidth = GetHalfWidth();
-                float positionX = GetLastCubePosition();
-
-                if (positionX + halfWidth < position.x || positionX - halfWidth > position.x)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            newSceneCubic.RemoveSceneCube
+                .Subscribe(RemoveSceneCube)
+                .AddTo(_disposable);
         }
-
-        private float GenerateRandomPositionXCubic(float positionX)
-        {
-            float halfWidth = GetHalfWidth();
-            float lastCubePositionX = GetLastCubePosition();
-
-            float maxRandomPositionX;
-            float minRandomPositionX;
-            
-            if (positionX > lastCubePositionX)
-            {
-                maxRandomPositionX = lastCubePositionX + halfWidth - positionX;
-                minRandomPositionX = halfWidth - maxRandomPositionX;
-            }
-            else
-            {
-                minRandomPositionX = lastCubePositionX - halfWidth + Math.Abs(positionX);
-                maxRandomPositionX = halfWidth - minRandomPositionX;
-            }
-            
-            float randomWidth =  Random.Range(minRandomPositionX, maxRandomPositionX);
-            
-            return positionX + randomWidth; 
-        }
-
-        private float GetLastCubePosition()
-        {
-            return _currentSceneCubes.LastOrDefault()!.transform.position.x;
-        }
+        
         
         #endregion
 
@@ -161,13 +135,13 @@ namespace Core.Scripts.SceneManagers
             float hight = _sceneCubic.SpriteRenderCube.GetComponent<Renderer>().bounds.size.y;
             for (int i = index; i < _currentSceneCubes.Count; i++)
             {
-                _currentSceneCubes[i].FallCubic(_currentSceneCubes[i].transform.position.y - hight);
+                _currentSceneCubes[i].AnimationCube.FallCubic(_currentSceneCubes[i].transform, _currentSceneCubes[i].transform.position.y - hight);
             }
         }
 
         private bool CheckDestroyUpCubes(Vector2 upperCubic, Vector2 lowerCubic)
         {
-            float halfWidth = GetHalfWidth();
+            float halfWidth = _checkingCubes.GetHalfWidth();
 
             return lowerCubic.x + halfWidth < upperCubic.x - halfWidth ||
                     lowerCubic.x - halfWidth > upperCubic.x + halfWidth;
@@ -176,9 +150,43 @@ namespace Core.Scripts.SceneManagers
 
         #endregion
 
-        private float GetHalfWidth()
+        #region SaveCubes
+
+        private void SaveCubes()
         {
-            return _sceneCubic.SpriteRenderCube.GetComponent<Renderer>().bounds.size.x / 2;
+            RootSavesData rootSavesData = new RootSavesData();
+            foreach (var cube in _currentSceneCubes)
+            {
+                rootSavesData.Saves.Add(new SaveData
+                {
+                    Id = cube.Id,
+                    PositionX = cube.transform.position.x,
+                    PositionY = cube.transform.position.y
+                });
+            }
+
+            SaveManager.SaveGame(rootSavesData).Forget();
         }
+
+        private async void LoadCubes()
+        {
+            RootSavesData rootSavesData = await SaveManager.LoadGame();
+
+            if (rootSavesData == null)
+            {
+                return;
+            }
+            
+            foreach (SaveData saveCube in rootSavesData.Saves)
+            {
+                LoadCubic(new CubicDropData
+                {
+                    Position = new Vector2(saveCube.PositionX, saveCube.PositionY),
+                    CubeData = _currentViewModel.CubicTowerView.CubesConfig.Cubes.Find(cube => cube.Id.Equals(saveCube.Id))
+                });   
+            }
+        }
+
+        #endregion
     }
 }

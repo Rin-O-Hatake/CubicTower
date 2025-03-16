@@ -13,22 +13,32 @@ namespace Core.Scripts.UI
         #region Field
 
         [SerializeField] private ScrollRect _scrollRect;
-        [SerializeField] private CubesConfig _cubesConfig; 
+        [SerializeField] private CubesConfig _cubesConfig;
+        [SerializeField] private Button _saveButton;
         
         public CompositeDisposable _disposables = new CompositeDisposable();
+        
+        private Action _saveDataAction;
+        
         #region Properties
 
         public Transform ContentCubes => _scrollRect.content;
+        public CubesConfig CubesConfig => _cubesConfig;
 
         #endregion
 
         #endregion
+
+        public void InitCubicTowerView(Action saveData)
+        {
+            _saveDataAction = saveData;
+        }
         
         public List<Cube> CreateAllCubes(Action<CubicDropData> isDrop)
         {
             List<Cube> cubes = new List<Cube>();
 
-            for (int index = 0; index < _cubesConfig.Cubes.Length; index++)
+            for (int index = 0; index < _cubesConfig.Cubes.Count; index++)
             {
                 Cube newCube = Instantiate(_cubesConfig.CubePrefab, ContentCubes.transform);
 
@@ -55,9 +65,24 @@ namespace Core.Scripts.UI
 
         #region MonoBehavior
 
+        public void Awake()
+        {
+            _saveButton.onClick.AddListener(SaveButton);
+        }
+
         public void OnDestroy()
         {
             _disposables.Dispose();
+            _saveButton.onClick.RemoveAllListeners();
+        }
+
+        #endregion
+
+        #region Buttons
+
+        public void SaveButton()
+        {
+            _saveDataAction?.Invoke();        
         }
 
         #endregion
